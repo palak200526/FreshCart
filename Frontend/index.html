@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FreshCart – Grocery Delivery in 30 Minutes</title>
+  <!-- Logo & body fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary-50:#ecfdf5; /* light */
+      --primary-100:#d1fae5;
+      --primary-200:#a7f3d0;
+      --primary-300:#6ee7b7;
+      --primary-400:#34d399;
+      --primary:#10b981;   /* emerald-500 */
+      --primary-600:#059669;
+      --primary-700:#047857;
+      --ink:#0f172a;       /* slate-900 */
+      --muted:#64748b;     /* slate-500 */
+      --bg:#f8fafc;        /* slate-50 */
+      --card:#ffffff;
+      --radius:16px;
+      --shadow:0 10px 25px rgba(2, 6, 23, 0.08);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:Poppins, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; color:var(--ink); background:var(--bg)}
+    .container{max-width:1200px;margin:0 auto;padding:0 20px}
+    .btn{display:inline-flex;align-items:center;gap:10px;border:0;border-radius:12px;padding:12px 18px;background:linear-gradient(135deg,var(--primary),var(--primary-600));color:#fff;font-weight:600;cursor:pointer;box-shadow:var(--shadow)}
+    .btn:active{transform:translateY(1px)}
+
+    /* NAVBAR */
+    .nav{position:sticky;top:0;z-index:50;background:linear-gradient(180deg, #0fbf78, #0ca26b);box-shadow:0 4px 18px rgba(2,6,23,.08)}
+    .nav .inner{display:flex;align-items:center;gap:18px;justify-content:space-between;padding:12px 0}
+    .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none}
+    .brand__logo{font-family:Pacifico, cursive;font-size:28px;letter-spacing:.3px}
+    .brand__tag{font-size:12px;opacity:.9}
+    .nav-actions{display:flex;align-items:center;gap:14px}
+    .search{display:flex;align-items:center;gap:8px;background:#ffffff22;border:1px solid #ffffff33;border-radius:12px;padding:8px 12px;color:#fff;backdrop-filter: blur(6px)}
+    .search input{all:unset;color:#fff;::placeholder{color:#fff9}}
+    .pill{color:#fff;background:#ffffff22;border:1px solid #ffffff33;border-radius:999px;padding:8px 12px;font-size:13px}
+    .cart{position:relative;color:#0f172a;background:#fff;border-radius:12px;padding:8px 12px;font-weight:700}
+    .cart__badge{position:absolute;top:-8px;right:-8px;background:#ef4444;color:#fff;font-weight:700;border-radius:999px;min-width:22px;height:22px;display:grid;place-items:center;font-size:12px;border:2px solid #fff}
+    .hamburger{display:none;background:#ffffff22;color:#fff;border:1px solid #ffffff33;border-radius:12px;padding:8px 10px}
+
+    /* MOBILE NAV */
+    .mobile-menu{display:none}
+    @media (max-width: 900px){
+      .search{display:none}
+      .pill{display:none}
+      .hamburger{display:inline-flex}
+      .mobile-menu{display:none; background:linear-gradient(180deg, #0ca26b, #0a8c5c);}
+      .mobile-menu.open{display:block}
+      .mobile-menu a{display:block;color:#fff;padding:14px 20px;border-top:1px solid #ffffff22;text-decoration:none}
+    }
+
+    /* HERO */
+    .hero{position:relative;min-height:72vh;display:grid;place-items:center;text-align:center;color:#fff}
+    .hero::before{content:"";position:absolute;inset:0;background:
+      linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.45)),
+      url('https://www.shutterstock.com/image-photo/healthy-food-background-photography-different-260nw-1696846630.jpg') center/cover no-repeat;filter:saturate(1.1)}
+    .hero .content{position:relative;z-index:1;padding:20px}
+    .hero h1{font-size: clamp(28px, 4vw, 50px);line-height:1.1;margin:0 0 12px}
+    .hero p{font-size:clamp(14px, 2vw, 18px);opacity:.95;margin:0 0 22px}
+    .subpill{display:inline-block;background:#ffffffee;color:#0f172a;border-radius:999px;padding:8px 12px;font-weight:700;margin-bottom:14px}
+
+    /* CATEGORIES */
+    section{content-visibility:auto;contain-intrinsic-size: 1px 500px}
+    .section{padding:56px 0}
+    .section h2{font-size:clamp(22px, 3vw, 32px);margin:0 0 10px}
+    .section p.lead{color:var(--muted);margin:0 0 28px}
+
+    .grid{display:grid;gap:18px}
+    .grid--cats{grid-template-columns:repeat(6, 1fr)}
+    @media (max-width:1100px){.grid--cats{grid-template-columns:repeat(3, 1fr)}}
+    @media (max-width:640px){.grid--cats{grid-template-columns:repeat(2, 1fr)}}
+
+    .cat{
+      position:relative;overflow:hidden;border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow);cursor:pointer
+    }
+    .cat img{width:100%;height:160px;object-fit:cover;display:block}
+    .cat b{position:absolute;left:10px;bottom:10px;background:#ffffffee;color:#0f172a;border-radius:999px;padding:6px 10px}
+
+    /* PRODUCTS */
+    .grid--prods{grid-template-columns: repeat(4, 1fr)}
+    @media (max-width:1100px){.grid--prods{grid-template-columns: repeat(3, 1fr)}}
+    @media (max-width:780px){.grid--prods{grid-template-columns: repeat(2, 1fr)}}
+    @media (max-width:520px){.grid--prods{grid-template-columns: 1fr}}
+
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    .card img{width:100%;height:200px;object-fit:cover;display:block}
+    .card .pad{padding:14px}
+    .price{font-weight:700}
+    .meta{color:var(--muted);font-size:14px}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+
+    /* TRUST + CTA */
+    .trust{display:grid;grid-template-columns:repeat(3, 1fr);gap:16px}
+    @media (max-width:900px){.trust{grid-template-columns:1fr}}
+    .trust .item{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center}
+
+    /* FOOTER */
+    footer{margin-top:56px;background:linear-gradient(180deg, #075e46, #064e3b);color:#e5f9f1}
+    footer .inner{padding:30px 0;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:20px}
+    @media (max-width:900px){footer .inner{grid-template-columns:1fr 1fr}}
+    @media (max-width:600px){footer .inner{grid-template-columns:1fr}}
+    footer a{color:#c8f5e6;text-decoration:none}
+    footer .bottom{border-top:1px solid #ffffff22;padding:12px 0;text-align:center;color:#a7f3d0}
+
+    /* TOAST */
+    .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.3s}
+    .toast.show{opacity:1;pointer-events:auto}
+
+    .popular-card img {
+  width: 60px;
+  /* max-width: 200px;   keeps images from being too large */
+  height: 60px;      /* fixed height */
+  object-fit: contain; /* keeps aspect ratio without cropping */
+  margin: 0 auto 0.75rem;
+  display: block;
+}
+   
+    
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="nav">
+    <div class="container inner">
+      <!-- Brand Logo -->
+      <a class="brand" href="index.html">
+        <div class="brand__logo">FreshCart</div>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav class="nav-links" style="display:flex;gap:20px;">
+        <a href="index.html" style="color:#fff;text-decoration:none;font-weight:500;">Home</a>
+        <a href="products.html" style="color:#fff;text-decoration:none;font-weight:500;">Products</a>
+        <a href="orders.html" style="color:#fff;text-decoration:none;font-weight:500;">Orders</a>
+        <a href="support.html" style="color:#fff;text-decoration:none;font-weight:500;">Support</a>
+      </nav>
+
+      <!-- Right Actions: Search, Cart, User -->
+      <div class="nav-actions" style="display:flex;align-items:center;gap:14px;">
+        <!-- Search Bar -->
+        <input id="searchInput" type="text" placeholder="Search products..." style="padding:6px 10px;border-radius:12px;border:none;outline:none;width:180px;">
+
+        <!-- Cart -->
+        <button class="cart" id="cartBtn">
+          🛒 Cart <span class="cart__badge" id="cartCount">0</span>
+        </button>
+
+        <!-- User Account -->
+        <button id="authBtn" class="btn" style="background:#fff;color:var(--primary);padding:8px 14px;font-weight:500;">Login</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section id="hero" class="hero" aria-label="Freshness Hero">
+    <div class="content container">
+      <span class="subpill">30-Minute Delivery • Quality Guaranteed</span>
+      <h1>Freshness at Your Doorstep</h1>
+      <p>Order groceries online and get them delivered in 30 minutes. Quality guaranteed.</p>
+      <a class="btn" href="#categories">Shop Now</a>
+    </div>
+  </section>
+
+  <!-- TRUST BADGES -->
+  <section class="section">
+    <div class="container trust">
+      <div class="item"><span>🚚</span><div><b>Superfast Delivery</b><div class="meta">Average 25–35 minutes</div></div></div>
+      <div class="item"><span>🧊</span><div><b>Freshness Sealed</b><div class="meta">Chilled packs for perishables</div></div></div>
+      <div class="item"><span>🔁</span><div><b>No-Questions Returns</b><div class="meta">Full refund if not happy</div></div></div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section id="categories" class="section" aria-labelledby="catHeading">
+    <div class="container">
+      <h2 id="catHeading">Shop by Category</h2>
+      <p class="lead">Tap a category to explore the freshest picks.</p>
+      <div class="grid grid--cats">
+        <a class="cat" href="#popular" aria-label="Fruits">
+          <img loading="lazy" decoding="async" data-fallback="https://picsum.photos/seed/fruits/600/400" src="https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?auto=format&fit=crop&w=800&q=80" alt="Fruits" referrerpolicy="no-referrer">
+          <b>Fruits</b>
+        </a>
+        <a class="cat" href="#popular" aria-label="Vegetables">
+          <img loading="lazy" decoding="async" data-fallback="https://picsum.photos/seed/vegetables/600/400" src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=800&q=80" alt="Vegetables" referrerpolicy="no-referrer">
+          <b>Vegetables</b>
+        </a>
+        <a class="cat" href="#popular" aria-label="Bakery">
+          <img loading="lazy" decoding="async" data-fallback="https://picsum.photos/seed/bakery/600/400" src="https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=800&q=80" alt="Bakery" referrerpolicy="no-referrer">
+          <b>Bakery</b>
+        </a>
+        <a class="cat" href="#popular" aria-label="Dairy">
+          <img loading="lazy" decoding="async" data-fallback="https://picsum.photos/seed/dairy/600/400" src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80" alt="Dairy" referrerpolicy="no-referrer">
+          <b>Dairy</b>
+        </a>
+        <a class="cat" href="#popular" aria-label="Meat & Seafood">
+          <img loading="lazy" decoding="async" data-fallback="https://picsum.photos/seed/meat/600/400" src="https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=800&q=80" alt="Meat & Seafood" referrerpolicy="no-referrer">
+          <b>Meat & Seafood</b>
+        </a>
+        <a class="cat" href="#popular" aria-label="Beverages">
+          <img loading="lazy" decoding="async" data-fallback="https://picsum.photos/seed/beverages/600/400" src="https://images.unsplash.com/photo-1541976076758-347942db1970?auto=format&fit=crop&w=800&q=80" alt="Beverages" referrerpolicy="no-referrer">
+          <b>Beverages</b>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- POPULAR PRODUCTS -->
+  <section id="popular" class="section" aria-labelledby="popularHeading" style="background:var(--primary-50)">
+       <section class="container" style="padding:40px 0;">
+  <h2>Popular Products</h2>
+  <div class="grid grid--prods" id="popularGrid"></div>
+</section>
+
+    </div>
+  </section>
+
+  <!-- CONTACT/NEWSLETTER -->
+  <section id="contact" class="section">
+    <div class="container" style="display:grid;gap:20px;grid-template-columns:1.4fr 1fr">
+      <div>
+        <h2>Never run out again</h2>
+        <p class="lead">Get seasonal offers and restock reminders in your inbox.</p>
+        <form onsubmit="event.preventDefault(); toast('Thanks! You are subscribed.'); this.reset();" class="card" style="padding:16px">
+          <div class="row" style="gap:10px">
+            <input type="email" required placeholder="Enter your email" aria-label="Email" style="flex:1;padding:12px 14px;border-radius:12px;border:1px solid #e2e8f0">
+            <button class="btn">Subscribe</button>
+          </div>
+        </form>
+      </div>
+      <div class="card" style="padding:16px">
+        <h3 style="margin-top:0">We deliver to your area</h3>
+        <p class="meta">Check availability by pincode.</p>
+        <form onsubmit="event.preventDefault(); toast('Great news! Delivery available in your area.');">
+          <div class="row" style="gap:10px">
+            <input type="text" inputmode="numeric" pattern="[0-9]{6}" placeholder="Enter 6-digit PIN" aria-label="Pincode" style="flex:1;padding:12px 14px;border-radius:12px;border:1px solid #e2e8f0" required>
+            <button class="btn">Check</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container inner">
+      <div>
+        <div class="brand__logo" style="font-family:Pacifico, cursive; color:#fff; font-size:26px">FreshCart</div>
+        <p class="meta" style="color:#d1fae5">Freshness delivered in minutes. 6AM–11PM daily.</p>
+      </div>
+      <div>
+        <b>Shop</b>
+        <ul style="list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px">
+          <li><a href="#categories">Fruits & Vegetables</a></li>
+          <li><a href="#popular">Popular Products</a></li>
+          <li><a href="#">New Arrivals</a></li>
+        </ul>
+      </div>
+      <div>
+        <b>Company</b>
+        <ul style="list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px">
+          <li><a href="#">About</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Help Center</a></li>
+        </ul>
+      </div>
+      <div>
+        <b>Get the app</b>
+        <div style="display:grid;gap:10px;margin-top:10px">
+          <a href="#" class="pill" style="display:inline-flex;align-items:center;gap:8px;background:#ffffff22;">📱 App Store</a>
+          <a href="#" class="pill" style="display:inline-flex;align-items:center;gap:8px;background:#ffffff22;">▶ Play Store</a>
+        </div>
+      </div>
+    </div>
+    <div class="bottom">© 2025 FreshCart. All rights reserved.</div>
+  </footer>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- CART SIDEBAR -->
+  <div id="cartSidebar" style="position:fixed;top:0;right:-400px;width:360px;height:100vh;background:#fff;box-shadow:-5px 0 20px rgba(0,0,0,0.15);transition:0.3s;z-index:999;display:flex;flex-direction:column;">
+    <div style="padding:20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;">
+      <h2 style="margin:0;font-size:20px;">Your Cart</h2>
+      <button id="closeCart" style="font-size:22px;border:none;background:none;cursor:pointer;">&times;</button>
+    </div>
+    <div id="cartItems" style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;">
+      <!-- Cart items dynamically added here -->
+    </div>
+    <div style="padding:20px;border-top:1px solid #e2e8f0;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+        <b>Total:</b>
+        <span id="cartTotal">₹0</span>
+      </div>
+      <button id="checkoutBtn" class="btn" style="width:100%;">Checkout</button>
+    </div>
+  </div>
+
+  <!-- PRODUCT MODAL -->
+  <div id="productModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000;">
+    <div style="background:#fff;border-radius:16px;width:90%;max-width:400px;overflow:hidden;box-shadow:0 10px 25px rgba(0,0,0,0.2);position:relative;">
+      <button id="closeModal" style="position:absolute;top:10px;right:12px;font-size:22px;border:none;background:none;cursor:pointer;">&times;</button>
+      <img id="modalImg" src="" alt="" style="width:100%;height:250px;object-fit:cover;">
+      <div style="padding:16px;">
+        <h3 id="modalName"></h3>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:10px 0;">
+          <span id="modalPrice" style="font-weight:700"></span>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button id="qtyMinus" style="padding:4px 8px;">−</button>
+            <span id="modalQty">1</span>
+            <button id="qtyPlus" style="padding:4px 8px;">+</button>
+          </div>
+        </div>
+        <button id="modalAddBtn" class="btn" style="width:100%;">Add to Cart</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== APP SCRIPT ===================== -->
+   <script>
+async function loadPopular(){
+  try{
+    const res = await fetch("http://localhost:3000/api/products");
+    const data = await res.json();
+    const grid = document.getElementById("popularGrid");
+    grid.innerHTML = "";
+
+    // show only first 8 products (or filter by popularity if backend provides a flag)
+    data.slice(0,8).forEach(prod=>{
+      const card=document.createElement("article");
+      card.className="card"; 
+      card.innerHTML=`
+        <img src="${prod.imageUrl || "https://picsum.photos/300"}" alt="${prod.name}">
+        <div class="pad">
+          <div class="row">
+            <h3>${prod.name}</h3>
+            <span class="price">₹${prod.price}</span>
+          </div>
+          <div class="meta">${prod.description}</div>
+          <button class="btn add">Add to Cart</button>
+        </div>`;
+      
+      // add to cart
+      card.querySelector(".add").addEventListener("click",e=>{
+        e.stopPropagation();
+        addToCart({id:prod._id,name:prod.name,price:prod.price,qty:1});
+      });
+
+      // open modal on click
+      card.addEventListener("click",e=>{
+        if(e.target.tagName.toLowerCase()!=='button'){
+          openModal({
+            id:prod._id,
+            name:prod.name,
+            price:prod.price,
+            description:prod.description,
+            image:prod.imageUrl || "https://picsum.photos/300"
+          });
+        }
+      });
+
+      grid.appendChild(card);
+    });
+  }catch(e){console.error("Popular products load error",e);}
+}
+
+// init on homepage
+loadPopular();
+</script>
+
+  <script>
+    /************ CONFIG ************/
+    const BASE_URL = 'http://localhost:3000';
+    const CART_KEY = 'freshcart_cart_items'; // guest cart
+    const productGrid = document.getElementById('productGrid');
+    const resultCount = document.getElementById('resultCount');
+    const searchInput = document.getElementById('searchInput');
+
+    /************ AUTH UI ************/
+    const authBtn = document.getElementById("authBtn");
+    function getToken(){ return localStorage.getItem("token"); }
+    function isAuthed(){ return !!getToken(); }
+    function getUserId(){ return localStorage.getItem("userId"); }
+
+    function updateAuthBtn(){
+      if(isAuthed()){
+        authBtn.textContent = "Logout";
+        authBtn.onclick = ()=>{ localStorage.clear(); toast('Logged out'); location.reload(); };
+      }else{
+        authBtn.textContent = "Login";
+        authBtn.onclick = ()=> location.href="login.html";
+      }
+    }
+    updateAuthBtn();
+
+    /************ API WRAPPER ************/
+    async function apiFetch(path, options={}){
+      const headers = options.headers || {};
+      if(isAuthed()) headers['Authorization'] = `Bearer ${getToken()}`;
+      if(options.body && !headers['Content-Type']) headers['Content-Type']='application/json';
+      const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+      // Try to parse JSON (even on non-ok)
+      let data = null;
+      try{ data = await res.json(); }catch{ /* ignore */ }
+      if(!res.ok) throw { status: res.status, message: data?.message || 'Request failed', data };
+      return data;
+    }
+
+    /************ IMAGE FALLBACK ************/
+    document.querySelectorAll('img[data-fallback]').forEach(img => {
+      img.addEventListener('error', () => {
+        if (img.dataset.fallback) {
+          img.src = img.dataset.fallback;
+          img.removeAttribute('data-fallback');
+        }
+      }, { once: true });
+    });
+
+    /************ PRODUCTS ************/
+    let ALL_PRODUCTS = [];
+
+    function priceToDisplay(p){
+      // Accept number or string; fallback to 0
+      const n = Number(p||0);
+      return '₹' + n.toLocaleString('en-IN');
+    }
+
+    function productCardHTML(prod){
+      const id = prod._id || prod.id || prod.sku || '';
+      const name = prod.name || 'Product';
+      const price = prod.price ?? prod.unitPrice ?? 0;
+      const img = (Array.isArray(prod.images) && prod.images[0]) || prod.image || prod.photo || 'https://picsum.photos/seed/product/1000/700';
+      const desc = prod.description || prod.subtitle || '';
+
+      return `
+      <article class="card" data-sku="${id}" data-product-id="${id}">
+        <img loading="lazy" decoding="async"
+             data-fallback="https://picsum.photos/seed/${encodeURIComponent(name)}/600/400"
+             src="${img}" alt="${name}">
+        <div class="pad">
+          <div class="row">
+            <h3>${name}</h3>
+            <span class="price">${priceToDisplay(price)}</span>
+          </div>
+          <div class="meta">${desc || '&nbsp;'}</div>
+          <button class="btn add" data-id="${id}" data-name="${name}" data-price="${price}">Add to Cart</button>
+        </div>
+      </article>`;
+    }
+
+    function renderProducts(list){
+      productGrid.innerHTML = list.map(productCardHTML).join('');
+      resultCount.textContent = list.length ? `${list.length} items` : 'No items';
+      // rebind add-to-cart + modal open
+      bindProductInteractions();
+    }
+
+    async function loadProducts(){
+      try{
+        const data = await apiFetch('/api/products');
+        ALL_PRODUCTS = Array.isArray(data) ? data : (data?.products || []);
+        renderProducts(ALL_PRODUCTS);
+      }catch(err){
+        // Fallback to your original static 4 items if API fails
+        ALL_PRODUCTS = [
+          { _id:'apple-1', name:'Apples', price:120, images:['https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?auto=format&fit=crop&w=1000&q=80'], description:'Fresh Apples' },
+          { _id:'tomato-1', name:'Tomatoes', price:50, images:['https://images.unsplash.com/photo-1524594081293-190a2fe0baae?auto=format&fit=crop&w=1000&q=80'], description:'Organic Tomatoes' },
+          { _id:'milk-1', name:'Milk', price:60, images:['https://images.unsplash.com/photo-1576186726111-0468d51c6a78?auto=format&fit=crop&w=1000&q=80'], description:'Fresh Milk' },
+          { _id:'grocery-1', name:'Groceries', price:299, images:['https://images.unsplash.com/photo-1586201375754-1421e0aa2fda?auto=format&fit=crop&w=1000&q=80'], description:'Daily Essentials' },
+        ];
+        renderProducts(ALL_PRODUCTS);
+      }
+    }
+
+    // Search filter (client-side)
+    searchInput?.addEventListener('input', e=>{
+      const q = e.target.value.trim().toLowerCase();
+      const filtered = !q ? ALL_PRODUCTS : ALL_PRODUCTS.filter(p =>
+        (p.name||'').toLowerCase().includes(q) ||
+        (p.description||'').toLowerCase().includes(q)
+      );
+      renderProducts(filtered);
+    });
+
+    /************ CART (Guest + Auth) ************/
+    const cartSidebar = document.getElementById('cartSidebar');
+    const cartItemsEl = document.getElementById('cartItems');
+    const cartTotalEl = document.getElementById('cartTotal');
+    const cartBtn = document.getElementById('cartBtn');
+    const closeCart = document.getElementById('closeCart');
+    const cartCountEl = document.getElementById('cartCount');
+
+    function openCart(){ cartSidebar.style.right='0'; }
+    function closeCartSidebar(){ cartSidebar.style.right='-400px'; }
+    cartBtn.addEventListener('click',openCart);
+    closeCart.addEventListener('click',closeCartSidebar);
+
+    // Guest cart helpers
+    function getGuestCart(){
+      try{ return JSON.parse(localStorage.getItem(CART_KEY)) || []; }catch{ return []; }
+    }
+    function setGuestCart(items){ localStorage.setItem(CART_KEY, JSON.stringify(items)); }
+
+    // Unified badge
+    async function updateBadge(){
+      if(isAuthed()){
+        try{
+          const data = await apiFetch('/api/cart');
+          const items = Array.isArray(data) ? data : (data?.items || []);
+          const totalQty = items.reduce((a,i)=> a + (i.quantity || i.qty || 1), 0);
+          cartCountEl.textContent = totalQty;
+          return;
+        }catch{/* fallback to guest */}
+      }
+      const totalQty = getGuestCart().reduce((a,i)=> a + (i.qty||1), 0);
+      cartCountEl.textContent = totalQty;
+    }
+
+    // Render cart (auth-aware)
+    async function renderCart(){
+      let items=[], total=0;
+
+      if(isAuthed()){
+        try{
+          const data = await apiFetch('/api/cart');
+          items = Array.isArray(data) ? data : (data?.items || []);
+          // Normalize to {cartItemId, productId, name, price, qty}
+          items = items.map(it=>{
+            const prod = it.product || it.productId || {};
+            const prodId = prod._id || it.productId || it._id || it.id;
+            const name = prod.name || it.name || 'Item';
+            const price = Number(it.price ?? prod.price ?? it.unitPrice ?? 0);
+            const qty = Number(it.quantity ?? it.qty ?? 1);
+            const cartItemId = it._id || it.id; // server-side cart line id
+            return { cartItemId, productId: prodId, name, price, qty };
+          });
+        }catch(err){
+          // If server fails, fall back to guest cart so UI still works
+          items = getGuestCart();
+        }
+      }else{
+        items = getGuestCart();
+      }
+
+      cartItemsEl.innerHTML='';
+      items.forEach((item, idx)=>{
+        const itemTotal = item.price * (item.qty || 1);
+        total += itemTotal;
+        const div = document.createElement('div');
+        div.style.display='flex';
+        div.style.justifyContent='space-between';
+        div.style.alignItems='center';
+        div.innerHTML = `
+          <div>
+            <b>${item.name}</b><br>
+            <span style="color:#64748b;font-size:13px;">₹${item.price} × ${item.qty || 1}</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button style="padding:2px 6px;" data-action="minus" data-idx="${idx}" data-id="${item.cartItemId||''}" data-pid="${item.productId||''}">−</button>
+            <button style="padding:2px 6px;" data-action="plus"  data-idx="${idx}" data-id="${item.cartItemId||''}" data-pid="${item.productId||''}">+</button>
+            <button style="padding:2px 6px;color:red;" data-action="remove" data-idx="${idx}" data-id="${item.cartItemId||''}" data-pid="${item.productId||''}">×</button>
+          </div>
+        `;
+        cartItemsEl.appendChild(div);
+      });
+
+      cartItemsEl.querySelectorAll('button').forEach(btn=>{
+        btn.addEventListener('click', async (e)=>{
+          const action = e.currentTarget.dataset.action;
+          const idx = Number(e.currentTarget.dataset.idx);
+          const cartItemId = e.currentTarget.dataset.id;
+          const pid = e.currentTarget.dataset.pid;
+          if(isAuthed()){
+            try{
+              if(action==='plus'){
+                await apiFetch(`/api/cart/${cartItemId||pid}`, { method:'PATCH', body: JSON.stringify({ quantityDelta: +1 }) });
+              }else if(action==='minus'){
+                await apiFetch(`/api/cart/${cartItemId||pid}`, { method:'PATCH', body: JSON.stringify({ quantityDelta: -1 }) });
+              }else if(action==='remove'){
+                await apiFetch(`/api/cart/${cartItemId||pid}`, { method:'DELETE' });
+              }
+            }catch(err){
+              toast(err.message || 'Cart update failed');
+            }
+          }else{
+            const cart = getGuestCart();
+            if(action==='plus'){ cart[idx].qty = (cart[idx].qty||1) + 1; }
+            if(action==='minus'){ cart[idx].qty = (cart[idx].qty||1) - 1; if(cart[idx].qty<=0) cart.splice(idx,1); }
+            if(action==='remove'){ cart.splice(idx,1); }
+            setGuestCart(cart);
+          }
+          await renderCart();
+          await updateBadge();
+        });
+      });
+
+      cartTotalEl.textContent = '₹'+ total.toFixed(2);
+      await updateBadge();
+    }
+
+    async function addToCartUnified({ productId, name, price, qty=1 }){
+      if(isAuthed()){
+        try{
+          await apiFetch('/api/cart', { method:'POST', body: JSON.stringify({ product: productId, quantity: qty }) });
+          toast(`${name} added to cart 🧺`);
+          await renderCart();
+          openCart();
+          return;
+        }catch(err){
+          toast(err.message || 'Could not add to cart');
+          // fall back to guest
+        }
+      }
+      // Guest
+      const cart = getGuestCart();
+      const idx = cart.findIndex(i => (i.productId||i.name) === (productId||name));
+      if(idx>-1) cart[idx].qty += qty;
+      else cart.push({ productId, name, price, qty });
+      setGuestCart(cart);
+      toast(`${name} added to cart 🧺`);
+      await renderCart();
+      openCart();
+    }
+
+    /************ PRODUCT MODAL + CARD INTERACTIONS ************/
+    const modal = document.getElementById('productModal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const modalImg = document.getElementById('modalImg');
+    const modalName = document.getElementById('modalName');
+    const modalPrice = document.getElementById('modalPrice');
+    const modalQty = document.getElementById('modalQty');
+    const qtyPlus = document.getElementById('qtyPlus');
+    const qtyMinus = document.getElementById('qtyMinus');
+    const modalAddBtn = document.getElementById('modalAddBtn');
+
+    let currentProduct = null;
+    let currentQty = 1;
+
+    function bindProductInteractions(){
+      // Card click -> open modal (ignore inner Add buttons)
+      document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('click', e => {
+          if(e.target.tagName === 'BUTTON') return;
+          const name = card.querySelector('h3').textContent;
+          const priceText = card.querySelector('.price').textContent.replace(/[^\d.]/g,'');
+          const price = Number(priceText);
+          const imgSrc = card.querySelector('img').src;
+          const productId = card.getAttribute('data-product-id') || card.getAttribute('data-sku');
+
+          currentProduct = { productId, name, price, imgSrc };
+          currentQty = 1;
+
+          modalImg.src = imgSrc;
+          modalName.textContent = name;
+          modalPrice.textContent = `₹${price}`;
+          modalQty.textContent = currentQty;
+
+          modal.style.display = 'flex';
+        });
+      });
+
+      // Add buttons on cards
+      document.querySelectorAll('.add').forEach(btn => btn.addEventListener('click', async e => {
+        e.stopPropagation();
+        const productId = btn.dataset.id || btn.closest('.card')?.getAttribute('data-product-id');
+        const name = btn.dataset.name;
+        const price = Number(btn.dataset.price);
+        await addToCartUnified({ productId, name, price, qty:1 });
+      }));
+    }
+
+    closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
+    modal.addEventListener('click', e => { if(e.target===modal) modal.style.display='none'; });
+    qtyPlus.addEventListener('click', () => { currentQty++; modalQty.textContent=currentQty; });
+    qtyMinus.addEventListener('click', () => { if(currentQty>1) { currentQty--; modalQty.textContent=currentQty; } });
+    modalAddBtn.addEventListener('click', async () => {
+      if(!currentProduct) return;
+      await addToCartUnified({ ...currentProduct, qty: currentQty });
+      modal.style.display='none';
+    });
+
+    /************ CHECKOUT ************/
+const checkoutBtn = document.getElementById("checkoutBtn");
+checkoutBtn.addEventListener("click", ()=>{
+  const token = getToken();
+  const userId = getUserId();
+
+  if(!token || !userId){
+    toast("Please login to continue ❌");
+    window.location.href="login.html";
+    return;
+  }
+
+  // ✅ Just redirect, do not place order here
+  window.location.href = "checkout.html";
+});
+
+
+    /************ TOAST ************/
+    function toast(msg){
+      const el = document.getElementById('toast');
+      el.textContent = msg; el.classList.add('show');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=> el.classList.remove('show'), 1800);
+    }
+
+    /************ INIT ************/
+    (async function init(){
+      await loadProducts();
+      await renderCart();
+    })();
+  </script>
+  <script>
+  // --- Search Bar Handler (common across all pages) ---
+  (function(){
+    const searchInput = document.getElementById('searchInput');
+    if(searchInput){
+      searchInput.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter'){
+          const q = encodeURIComponent(searchInput.value.trim());
+          // Redirect to products page with query string
+          if(q){
+            location.href = `products.html?q=${q}`;
+          } else {
+            location.href = 'products.html';
+          }
+        }
+      });
+    }
+  })();
+</script>
+
+</body>
+</html>

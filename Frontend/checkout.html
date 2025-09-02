@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FreshCart – Checkout</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --primary:#10b981; --primary-dark:#059669; --bg:#f8fafc; --card:#fff; --shadow:0 10px 25px rgba(2,6,23,.08);
+      --radius:16px; --ink:#0f172a; --muted:#64748b;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--ink);background:var(--bg)}
+    a{text-decoration:none;color:inherit}
+    .container{max-width:1200px;margin:0 auto;padding:20px}
+    h1,h2,h3{margin:0}
+    .btn{display:inline-flex;align-items:center;gap:10px;border:0;border-radius:12px;padding:12px 18px;background:var(--primary);color:#fff;font-weight:600;cursor:pointer;box-shadow:var(--shadow)}
+    .btn:active{transform:translateY(1px)}
+    input,select,textarea{width:100%;padding:12px;border:1px solid #ccc;border-radius:12px;font-size:14px;margin-top:6px;margin-bottom:16px}
+
+    /* NAVBAR */
+    .nav{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#0fbf78,#0ca26b);box-shadow:0 4px 18px rgba(2,6,23,.08)}
+    .nav .inner{display:flex;align-items:center;gap:18px;justify-content:space-between;padding:12px 20px}
+    .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-family:Pacifico,cursive;font-size:28px}
+    .nav-links{display:flex;gap:18px}
+    .nav-links a{color:#fff;font-weight:500}
+    .nav-actions{display:flex;align-items:center;gap:14px}
+    .cart{position:relative;color:#0f172a;background:#fff;border-radius:12px;padding:8px 12px;font-weight:700;cursor:pointer}
+    .cart__badge{position:absolute;top:-8px;right:-8px;background:#ef4444;color:#fff;font-weight:700;border-radius:999px;min-width:22px;height:22px;display:grid;place-items:center;font-size:12px;border:2px solid #fff}
+
+    /* CHECKOUT */
+    .checkout-section{padding:40px 0;display:grid;grid-template-columns:2fr 1fr;gap:30px}
+    .checkout-form{background:var(--card);padding:24px;border-radius:var(--radius);box-shadow:var(--shadow)}
+    .checkout-form h2{margin-bottom:20px}
+    .order-summary{background:var(--card);padding:24px;border-radius:var(--radius);box-shadow:var(--shadow)}
+    .order-summary h2{margin-bottom:16px}
+    .order-summary .item{display:flex;justify-content:space-between;margin-bottom:12px}
+    .order-summary .total{display:flex;justify-content:space-between;font-weight:600;margin-top:12px;font-size:18px}
+
+    @media(max-width:900px){.checkout-section{grid-template-columns:1fr}}
+    
+    /* FOOTER */
+    footer{margin-top:56px;background:linear-gradient(180deg, #075e46, #064e3b);color:#e5f9f1}
+    footer .inner{padding:30px 20px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:20px}
+    @media(max-width:900px){footer .inner{grid-template-columns:1fr 1fr}}
+    @media(max-width:600px){footer .inner{grid-template-columns:1fr}}
+    footer a{color:#c8f5e6}
+    footer .bottom{border-top:1px solid #ffffff22;padding:12px 0;text-align:center;color:#a7f3d0}
+
+    /* TOAST */
+    .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.3s}
+    .toast.show{opacity:1;pointer-events:auto}
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="nav">
+  <div class="inner container">
+    <a href="index.html" class="brand">FreshCart</a>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="orders.html">Orders</a>
+      <a href="support.html">Support</a>
+    </nav>
+    <div class="nav-actions">
+      <div class="cart" id="cartBtn">
+        🛒 Cart <span class="cart__badge" id="cartCount">0</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- CHECKOUT CONTENT -->
+<section class="checkout-section container">
+  <div class="checkout-form">
+    <h2>Shipping Details</h2>
+    <label>Name</label>
+    <input type="text" id="name" placeholder="Your full name" />
+    <label>Address</label>
+    <textarea id="address" placeholder="Street, City, Pincode"></textarea>
+    <label>Phone</label>
+    <input type="text" id="phone" placeholder="Mobile number" />
+    <label>Payment Method</label>
+    <select id="payment">
+      <option value="cod">Cash on Delivery</option>
+      <option value="card">Credit/Debit Card</option>
+      <option value="upi">UPI Payment</option>
+    </select>
+    <button class="btn" id="placeOrderBtn">Place Order</button>
+  </div>
+  <div class="order-summary">
+    <h2>Order Summary</h2>
+    <div id="summaryItems"></div>
+    <div class="total"><span>Total</span><span id="summaryTotal">₹0</span></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container inner">
+    <div>
+      <div class="brand__logo" style="font-family:Pacifico,cursive;font-size:26px">FreshCart</div>
+      <p class="meta" style="color:#d1fae5">Freshness delivered in minutes. 6AM–11PM daily.</p>
+    </div>
+    <div>
+      <b>Shop</b>
+      <ul style="list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px">
+        <li><a href="index.html#categories">Fruits & Vegetables</a></li>
+        <li><a href="index.html#popular">Popular Products</a></li>
+        <li><a href="#">New Arrivals</a></li>
+      </ul>
+    </div>
+    <div>
+      <b>Company</b>
+      <ul style="list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px">
+        <li><a href="#">About</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Help Center</a></li>
+      </ul>
+    </div>
+    <div>
+      <b>Get the app</b>
+      <div style="display:grid;gap:10px;margin-top:10px">
+        <a href="#" class="btn" style="background:#ffffff22;color:#fff;">📱 App Store</a>
+        <a href="#" class="btn" style="background:#ffffff22;color:#fff;">▶ Play Store</a>
+      </div>
+    </div>
+  </div>
+  <div class="bottom">© 2025 FreshCart. All rights reserved.</div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- POPUP MODAL -->
+<div id="orderModal" style="
+  position:fixed; inset:0; display:flex; justify-content:center; align-items:center;
+  background:rgba(0,0,0,0.6); visibility:hidden; opacity:0; transition:0.3s;
+  z-index:9999;
+">
+  <div style="background:#fff;padding:32px;border-radius:16px;text-align:center;max-width:450px;width:95%;max-height:90vh;overflow-y:auto;">
+    <h2>✅ Order Placed Successfully!</h2>
+    <p>Thank you for shopping with FreshCart. Your order will be delivered soon.</p>
+
+    <!-- ORDER ITEMS -->
+    <div id="modalItems" style="margin:20px 0;text-align:left"></div>
+    <div style="font-weight:600; margin-top:10px; text-align:right;">
+      Total: <span id="modalTotal"></span>
+    </div>
+    <div id="modalPartnerRow" style="margin-top:12px; text-align:left;">
+      <b>Delivery Partner:</b>
+      <span id="modalPartner" style="color:#64748b">Assigning...</span>
+    </div>
+
+    <button class="btn" id="closeModalBtn" style="margin-top:20px;">Back to Home</button>
+  </div>
+</div>
+
+<script>
+const CART_KEY = 'freshcart_cart_items';
+const cartCountEl = document.getElementById('cartCount');
+const summaryItemsEl = document.getElementById('summaryItems');
+const summaryTotalEl = document.getElementById('summaryTotal');
+const orderModal = document.getElementById('orderModal');
+const placeOrderBtn = document.getElementById('placeOrderBtn');
+const closeModalBtn = document.getElementById('closeModalBtn');
+
+const token = localStorage.getItem("token");
+const userId = localStorage.getItem("userId");
+
+function getCart(){ try{return JSON.parse(localStorage.getItem(CART_KEY))||[];}catch{return[];} }
+
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer=setTimeout(()=>el.classList.remove('show'),1800);
+}
+
+function updateBadge(){
+  const cart=getCart();
+  cartCountEl.textContent=cart.reduce((a,i)=>a+(i.qty||1),0);
+}
+
+function renderSummary(){
+  const cart=getCart();
+  summaryItemsEl.innerHTML='';
+  let total=0;
+  cart.forEach(i=>{
+    const t=i.price*(i.qty||1); total+=t;
+    const div=document.createElement('div');
+    div.className='item';
+    div.innerHTML=`<span>${i.name} × ${i.qty||1}</span><span>₹${t.toFixed(2)}</span>`;
+    summaryItemsEl.appendChild(div);
+  });
+  summaryTotalEl.textContent='₹'+total.toFixed(2);
+}
+
+updateBadge();
+renderSummary();
+
+// PLACE ORDER
+placeOrderBtn.addEventListener('click', async (e)=>{
+  e.preventDefault();
+
+  const name=document.getElementById('name').value.trim();
+  const address=document.getElementById('address').value.trim();
+  const phone=document.getElementById('phone').value.trim();
+  const paymentMethod=document.getElementById('payment').value;
+
+  if(!name || !address || !phone){
+    toast("Please fill all details ❌");
+    return;
+  }
+
+  const cart=getCart();
+  if(cart.length===0){
+    toast("Your cart is empty 🛒");
+    return;
+  }
+
+  const itemsPayload = cart.map(i => ({
+  product: i.productId || i.id,   // ✅ use productId from cart
+  quantity: i.qty || 1,
+  price: i.price
+}));
+
+
+  const totalAmount=itemsPayload.reduce((sum,i)=>sum+(i.price*i.quantity),0);
+
+  const payload={
+    user:userId,
+    items:itemsPayload,
+    address,
+    paymentMethod,
+    totalAmount
+  };
+
+  try{
+    const res=await fetch("http://localhost:3000/api/orders",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "Authorization": token ? "Bearer "+token : ""
+      },
+      body:JSON.stringify(payload)
+    });
+
+    if(!res.ok){
+      const err=await res.json();
+      throw new Error(err.message||"Order failed");
+    }
+
+    const data=await res.json();
+    console.log("Order placed:",data);
+
+    // clear cart
+    localStorage.removeItem(CART_KEY);
+    renderSummary();
+    updateBadge();
+
+    // fill modal with items
+    const modalItemsEl=document.getElementById('modalItems');
+    const modalTotalEl=document.getElementById('modalTotal');
+    modalItemsEl.innerHTML='';
+    let modalTotal=0;
+    data.items.forEach(i=>{
+      const line=`<div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                    <span>${i.product?.name || "Item"} × ${i.quantity}</span>
+                    <span>₹${(i.price*i.quantity).toFixed(2)}</span>
+                  </div>`;
+      modalItemsEl.innerHTML+=line;
+      modalTotal+=i.price*i.quantity;
+    });
+    modalTotalEl.textContent='₹'+modalTotal.toFixed(2);
+
+    // show success modal
+    orderModal.style.visibility='visible';
+    orderModal.style.opacity='1';
+
+    // Poll backend up to ~12s for delivery partner assignment
+    const modalPartnerEl=document.getElementById('modalPartner');
+    let attempts=0; const maxAttempts=6; // 6 * 2s = 12s
+    const poll = async () => {
+      try{
+        const r = await fetch(`http://localhost:3000/api/orders/${userId}`);
+        if(r.ok){
+          const orders = await r.json();
+          const latest = (orders||[]).find(o=>o._id===data._id);
+          if(latest && latest.deliveryPartner){
+            modalPartnerEl.textContent = `${latest.deliveryPartner} (Assigned)`;
+            clearInterval(timer);
+          }
+        }
+      }catch{}
+      attempts++;
+      if(attempts>=maxAttempts){ clearInterval(timer); }
+    };
+    const timer = setInterval(poll, 2000);
+    // fire first attempt quickly
+    setTimeout(poll, 800);
+
+  }catch(err){
+    console.error("Order error:",err);
+    toast("Error placing order ❌");
+  }
+});
+
+// CLOSE MODAL
+closeModalBtn.addEventListener('click',()=>{
+  orderModal.style.opacity='0';
+  orderModal.style.visibility='hidden';
+  window.location.href='index.html';
+});
+</script>
+
+<script>
+  // --- Search Bar Handler (common across all pages) ---
+  (function(){
+    const searchInput = document.getElementById('searchInput');
+    if(searchInput){
+      searchInput.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter'){
+          const q = encodeURIComponent(searchInput.value.trim());
+          // Redirect to products page with query string
+          if(q){
+            location.href = `products.html?q=${q}`;
+          } else {
+            location.href = 'products.html';
+          }
+        }
+      });
+    }
+  })();
+</script>
+
+
+</body>
+</html>

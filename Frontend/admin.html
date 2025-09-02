@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlinkIt Admin Panel</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin:0; }
+    .header { background:#333;color:#fff;padding:15px 20px;display:flex;justify-content:space-between;align-items:center }
+    .container { max-width:1200px;margin:20px auto;padding:0 20px }
+    .add-product,.product-card { background:#fff;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.1) }
+    .add-product { padding:20px;margin-bottom:20px }
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    label{display:block;margin-bottom:5px;font-weight:500}
+    input,select,textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:4px}
+    button{padding:10px 16px;border:none;border-radius:4px;color:#fff;cursor:pointer}
+    button:hover{opacity:.9}
+    .success{color:#27ae60;margin-top:10px}
+    .error{color:#e74c3c;margin-top:10px}
+    .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+    .product-card img{width:100%;height:200px;object-fit:cover}
+    .product-info{padding:15px}
+    .product-actions{margin-top:10px;display:flex;gap:10px}
+    .edit{background:#f39c12}.delete{background:#e74c3c}
+    /* modal */
+    .modal{position:fixed;top:0;left:0;width:100%;height:100%;display:none;justify-content:center;align-items:center;background:rgba(0,0,0,.5)}
+    .modal-content{background:#fff;padding:20px;border-radius:8px;max-width:500px;width:100%}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>BlinkIt Admin Panel</h1>
+    <div>
+      <span>Welcome, <span id="adminName"></span></span>
+      <button onclick="logout()" style="background:#e74c3c">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="add-product">
+      <h2>Add New Product</h2>
+      <form id="addProductForm" class="form-grid">
+        <div>
+          <label>Name</label><input id="name" required>
+        </div>
+        <div>
+          <label>Price</label><input type="number" id="price" required>
+        </div>
+        <div>
+          <label>Category</label>
+          <select id="category" required>
+            <option value="">Select</option>
+            <option>Groceries</option><option>Electronics</option>
+            <option>Fashion</option><option>Home</option><option>Beauty</option>
+          </select>
+        </div>
+        <div>
+          <label>Stock</label><input type="number" id="stock" required>
+        </div>
+        <div style="grid-column:1/-1">
+          <label>Image URL</label><input type="url" id="imageUrl" required>
+        </div>
+        <div style="grid-column:1/-1">
+          <label>Description</label><textarea id="description" rows="3" required></textarea>
+        </div>
+        <button type="submit" style="background:#27ae60;grid-column:1/-1">Add</button>
+      </form>
+      <div id="addMessage"></div>
+    </div>
+
+    <h2>Manage Products</h2>
+    <div id="productsGrid" class="products-grid"></div>
+  </div>
+
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <h3>Edit Product</h3>
+      <form id="editProductForm" class="form-grid">
+        <input type="hidden" id="editId">
+        <div><label>Name</label><input id="editName" required></div>
+        <div><label>Price</label><input type="number" id="editPrice" required></div>
+        <div><label>Category</label><input id="editCategory" required></div>
+        <div><label>Stock</label><input type="number" id="editStock" required></div>
+        <div style="grid-column:1/-1"><label>Image URL</label><input id="editImageUrl" required></div>
+        <div style="grid-column:1/-1"><label>Description</label><textarea id="editDescription" rows="3" required></textarea></div>
+        <button type="submit" style="background:#f39c12;grid-column:1/-1">Update</button>
+        <button type="button" onclick="closeModal()" style="background:#7f8c8d;grid-column:1/-1;margin-top:8px">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+<script>
+const API_BASE = 'http://localhost:3000/api';
+
+function checkAuth() {
+  // Use same keys as login.html
+  if(localStorage.getItem('role') !== 'admin') location='index.html';
+  document.getElementById('adminName').textContent = localStorage.getItem('name');
+}
+function logout(){
+  localStorage.clear();
+  location='index.html';
+}
+
+async function fetchJSON(url, opts={}) {
+  const res = await fetch(url, {
+    headers: {
+      'Content-Type':'application/json',
+      'Authorization':'Bearer '+localStorage.getItem('token')
+    },
+    ...opts
+  });
+  if(!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// Product management code here...
+checkAuth();
+loadProducts();
+</script>
+
+<script>
+async function loadProducts() {
+  try {
+    const products = await fetchJSON(API_BASE + '/products');
+    const grid = document.getElementById('productsGrid');
+    grid.innerHTML = products.map(p => `
+      <div class="product-card">
+        <img src="${p.imageUrl}" alt="${p.name}">
+        <div class="product-info">
+          <h4>${p.name}</h4>
+          <p>₹${p.price}</p>
+          <p>${p.description}</p>
+          <div class="product-actions">
+            <button class="edit" onclick="openEditModal('${p._id}')">Edit</button>
+            <button class="delete" onclick="deleteProduct('${p._id}')">Delete</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const product = {
+    name: document.getElementById('name').value,
+    price: +document.getElementById('price').value,
+    category: document.getElementById('category').value,
+    stock: +document.getElementById('stock').value,
+    imageUrl: document.getElementById('imageUrl').value,
+    description: document.getElementById('description').value
+  };
+
+  try {
+    await fetchJSON(API_BASE + '/products', {
+      method: 'POST',
+      body: JSON.stringify(product)
+    });
+    document.getElementById('addMessage').innerHTML = '<p class="success">Product added!</p>';
+    e.target.reset();
+    loadProducts();
+  } catch (err) {
+    document.getElementById('addMessage').innerHTML = '<p class="error">Error: ' + err.message + '</p>';
+  }
+});
+
+async function deleteProduct(id) {
+  if (!confirm('Delete this product?')) return;
+  await fetchJSON(API_BASE + '/products/' + id, { method: 'DELETE' });
+  loadProducts();
+}
+
+function openEditModal(id) {
+  // fill edit modal (you can expand later)
+  document.getElementById('editModal').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('editModal').style.display = 'none';
+}
+</script>
+
+
+</body>
+</html>

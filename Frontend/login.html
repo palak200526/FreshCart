@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FreshCart – Login / Signup</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#10b981; --primary-dark:#059669; --bg:#f8fafc; --card:#fff; --shadow:0 10px 25px rgba(2,6,23,.08);
+  --radius:16px; --ink:#0f172a; --muted:#64748b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--ink);background:var(--bg);}
+a{text-decoration:none;color:inherit;}
+
+/* NAVBAR */
+.nav{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#0fbf78,#0ca26b);box-shadow:0 4px 18px rgba(2,6,23,.08);}
+.nav .inner{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;max-width:1200px;margin:0 auto;}
+.brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-family:Pacifico,cursive;font-size:28px;}
+.nav-links{display:flex;gap:18px;}
+.nav-links a{color:#fff;font-weight:500;}
+.nav-actions{display:flex;align-items:center;gap:14px;}
+.cart{position:relative;color:#0f172a;background:#fff;border-radius:12px;padding:8px 12px;font-weight:700;cursor:pointer;}
+.cart__badge{position:absolute;top:-8px;right:-8px;background:#ef4444;color:#fff;font-weight:700;border-radius:999px;min-width:22px;height:22px;display:grid;place-items:center;font-size:12px;border:2px solid #fff;}
+
+/* MAIN CONTAINER */
+.container{max-width:900px;margin:40px auto;padding:20px;display:flex;gap:30px;align-items:center;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);}
+.illustration{flex:1;}
+.illustration img{width:100%;border-radius:var(--radius);}
+.form-container{flex:1;display:flex;flex-direction:column;gap:20px;}
+
+.tab-buttons{display:flex;gap:10px;margin-bottom:20px;}
+.tab-buttons button{flex:1;padding:12px;font-weight:600;border-radius:12px;border:none;cursor:pointer;background:#e0f2f1;color:var(--ink);transition:0.3s;}
+.tab-buttons button.active{background:var(--primary);color:#fff;}
+input,button{width:100%;padding:12px;border-radius:12px;border:1px solid #ccc;margin-top:10px;margin-bottom:16px;font-size:14px;}
+button{border:none;background:var(--primary);color:#fff;font-weight:600;cursor:pointer;box-shadow:var(--shadow);transition:0.3s;}
+button:hover{background:var(--primary-dark);}
+.form-card{background:var(--card);padding:24px;border-radius:var(--radius);box-shadow:var(--shadow);}
+
+/* TOAST */
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.3s}
+.toast.show{opacity:1;pointer-events:auto;}
+
+/* FOOTER */
+footer{margin-top:56px;background:linear-gradient(180deg, #075e46, #064e3b);color:#e5f9f1;}
+footer .inner{padding:30px 20px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:20px;max-width:1200px;margin:0 auto;}
+footer a{color:#c8f5e6;}
+footer .bottom{border-top:1px solid #ffffff22;padding:12px 0;text-align:center;color:#a7f3d0;}
+@media(max-width:900px){.container{flex-direction:column;}.nav .inner, footer .inner{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){footer .inner{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="nav">
+  <div class="inner">
+    <a href="index.html" class="brand">FreshCart</a>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="orders.html">Orders</a>
+      <a href="support.html">Support</a>
+    </nav>
+    <div class="nav-actions">
+      <div class="cart">
+        🛒 Cart <span class="cart__badge" id="cartCount">0</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN CONTAINER -->
+<div class="container">
+  <div class="illustration">
+    <img src="https://images.unsplash.com/photo-1617196030438-c1a0cf243dd3?auto=format&fit=crop&w=800&q=80" alt="FreshCart">
+  </div>
+  <div class="form-container">
+    <div class="tab-buttons">
+      <button id="loginTab" class="active">Login</button>
+      <button id="signupTab">Signup</button>
+    </div>
+
+    <div id="loginForm" class="form-card">
+      <input type="email" id="loginEmail" placeholder="Email" required>
+      <input type="password" id="loginPassword" placeholder="Password" required>
+      <button id="loginBtn">Login</button>
+    </div>
+
+    <div id="signupForm" class="form-card" style="display:none">
+      <input type="text" id="signupName" placeholder="Full Name" required>
+      <input type="email" id="signupEmail" placeholder="Email" required>
+      <input type="password" id="signupPassword" placeholder="Password" required>
+      <button id="signupBtn">Signup</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="inner">
+    <div>
+      <div class="brand__logo" style="font-family:Pacifico,cursive;font-size:26px">FreshCart</div>
+      <p class="meta" style="color:#d1fae5">Freshness delivered in minutes. 6AM–11PM daily.</p>
+    </div>
+    <div>
+      <b>Shop</b>
+      <ul style="list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px">
+        <li><a href="index.html#categories">Fruits & Vegetables</a></li>
+        <li><a href="index.html#popular">Popular Products</a></li>
+        <li><a href="#">New Arrivals</a></li>
+      </ul>
+    </div>
+    <div>
+      <b>Company</b>
+      <ul style="list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px">
+        <li><a href="#">About</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Help Center</a></li>
+      </ul>
+    </div>
+    <div>
+      <b>Get the app</b>
+      <div style="display:grid;gap:10px;margin-top:10px">
+        <a href="#" class="btn" style="background:#ffffff22;color:#fff;">📱 App Store</a>
+        <a href="#" class="btn" style="background:#ffffff22;color:#fff;">▶ Play Store</a>
+      </div>
+    </div>
+  </div>
+  <div class="bottom">© 2025 FreshCart. All rights reserved.</div>
+</footer>
+
+<script>
+const loginTab = document.getElementById('loginTab');
+const signupTab = document.getElementById('signupTab');
+const loginForm = document.getElementById('loginForm');
+const signupForm = document.getElementById('signupForm');
+const toastEl = document.getElementById('toast');
+
+function showToast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>toastEl.classList.remove('show'),1800);
+}
+
+// Switch tabs
+loginTab.addEventListener('click',()=>{
+  loginTab.classList.add('active');
+  signupTab.classList.remove('active');
+  loginForm.style.display='block';
+  signupForm.style.display='none';
+});
+signupTab.addEventListener('click',()=>{
+  signupTab.classList.add('active');
+  loginTab.classList.remove('active');
+  signupForm.style.display='block';
+  loginForm.style.display='none';
+});
+
+// ✅ Login with backend
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPassword').value.trim();
+  if (!email || !pass) { showToast('Fill all fields'); return; }
+
+  try {
+    const res = await fetch("http://localhost:3000/api/users/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password: pass })
+    });
+
+    const data = await res.json();
+    console.log(data); // debug backend response
+
+    if (res.ok) {
+      // Get user info safely
+      const user = data.user || { _id: data.userId, name: data.name, role: data.role };
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("userId", user._id || "");
+      localStorage.setItem("name", user.name || "");
+      localStorage.setItem("role", user.role || "");
+
+      showToast("Login Successful ✅");
+
+      setTimeout(() => {
+        if ((user.role || "").toLowerCase() === "admin") {
+          window.location.href = "admin.html"; // redirect admins
+        } else {
+          window.location.href = "index.html"; // redirect regular users
+        }
+      }, 1500);
+    } else {
+      showToast(data.message || "Login failed ❌");
+    }
+  } catch (err) {
+    console.error(err);
+    showToast("Server error ❌");
+  }
+});
+
+
+// ✅ Signup with backend
+document.getElementById('signupBtn').addEventListener('click', async ()=>{
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const pass = document.getElementById('signupPassword').value.trim();
+  if(!name||!email||!pass){ showToast('Fill all fields'); return; }
+
+  try {
+    const res = await fetch("http://localhost:3000/api/users/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password: pass })
+    });
+    const data = await res.json();
+
+    if(res.ok){
+      showToast("Signup Successful ✅, please login");
+      setTimeout(()=>{ 
+        signupTab.classList.remove('active');
+        loginTab.classList.add('active');
+        signupForm.style.display='none';
+        loginForm.style.display='block';
+      },1500);
+    }else{
+      showToast(data.message || "Signup failed ❌");
+    }
+  } catch(err){
+    showToast("Server error");
+  }
+});
+</script>
+
+</body>
+</html>

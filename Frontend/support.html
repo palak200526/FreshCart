@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FreshCart – Support</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{ --primary:#10b981; --primary-dark:#059669; --bg:#f8fafc; --card:#fff; --shadow:0 10px 25px rgba(2,6,23,.08); --radius:16px; --ink:#0f172a; --muted:#64748b; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--ink);background:var(--bg)}
+    a{text-decoration:none;color:inherit}
+    .container{max-width:1100px;margin:0 auto;padding:20px}
+    .btn{display:inline-flex;align-items:center;gap:10px;border:0;border-radius:12px;padding:10px 14px;background:var(--primary);color:#fff;font-weight:600;cursor:pointer;box-shadow:var(--shadow)}
+    .btn:active{transform:translateY(1px)}
+
+    .nav{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#0fbf78,#0ca26b);box-shadow:0 4px 18px rgba(2,6,23,.08)}
+    .nav .inner{display:flex;align-items:center;gap:18px;justify-content:space-between;padding:12px 20px}
+    .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-family:Pacifico,cursive;font-size:28px}
+    .nav-links{display:flex;gap:18px}
+    .nav-links a{color:#fff;font-weight:500}
+    .nav-actions{display:flex;align-items:center;gap:14px}
+    .cart{position:relative;color:#0f172a;background:#fff;border-radius:12px;padding:8px 12px;font-weight:700;cursor:pointer}
+    .cart__badge{position:absolute;top:-8px;right:-8px;background:#ef4444;color:#fff;font-weight:700;border-radius:999px;min-width:22px;height:22px;display:grid;place-items:center;font-size:12px;border:2px solid #fff}
+
+    .grid{display:grid;gap:16px;grid-template-columns:1.2fr .8fr}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+    .meta{color:var(--muted);font-size:14px}
+    .badge{display:inline-block;padding:4px 10px;border-radius:999px;background:#e2f6f1;color:#065f46;font-weight:600;font-size:12px}
+
+    .chat{display:flex;flex-direction:column;height:480px}
+    .chat-log{flex:1;overflow:auto;border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#fafafa;display:flex;flex-direction:column;gap:10px}
+    .chat-controls{margin-top:10px}
+    textarea{width:100%;padding:10px;border:1px solid #e5e7eb;border-radius:12px;resize:vertical}
+    .quick-qs{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .quick-qs button{background:#e2f6f1;color:#065f46}
+
+    footer{margin-top:56px;background:linear-gradient(180deg, #075e46, #064e3b);color:#e5f9f1}
+    footer .inner{padding:30px 20px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:20px}
+    footer .bottom{border-top:1px solid #ffffff22;padding:12px 0;text-align:center;color:#a7f3d0}
+    .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.3s}
+    .toast.show{opacity:1;pointer-events:auto}
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="inner container">
+      <a href="index.html" class="brand">FreshCart</a>
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="products.html">Products</a>
+        <a href="orders.html">Orders</a>
+        <a href="support.html">Support</a>
+      </nav>
+      <div class="nav-actions">
+        <input id="searchInput" type="text" placeholder="Search products..." style="padding:6px 10px;border-radius:12px;border:none;outline:none;width:180px;">
+        <button class="cart" id="cartBtn">🛒 Cart <span class="cart__badge" id="cartCount">0</span></button>
+        <button class="btn" id="authBtn" style="background:#fff;color:#0f172a">Login</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="container" style="padding:30px 0">
+    <h1>Help & Support</h1>
+    <p class="meta">Chat with support about your latest order, or enter an Order ID to load details.</p>
+  </section>
+
+  <section class="container grid">
+    <div class="card">
+      <h3 style="margin:0 0 8px">Support</h3>
+      <div id="agentStatus" class="meta" style="margin-bottom:8px">Choose a topic below or select Other to chat.</div>
+      <div class="chat">
+        <div id="chatLog" class="chat-log"></div>
+        <div class="quick-qs">
+          <button class="btn" data-q="Where is my order?">Where is my order?</button>
+          <button class="btn" data-q="I received a wrong item">I received a wrong item</button>
+          <button class="btn" data-q="I want to cancel my order">I want to cancel my order</button>
+          <button class="btn" data-q="Refund status">Refund status</button>
+          <button class="btn" id="otherBtn">Other</button>
+          <button class="btn" id="connectBtn" style="background:#0ea5e9;display:none;">Connect to Agent</button>
+        </div>
+        <div class="chat-controls" id="freeformBox" style="display:none;">
+          <textarea id="chatInput" rows="3" placeholder="Type your message (max 400 words)"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+            <small class="meta" id="wordCount">0/400 words</small>
+            <button class="btn" id="sendMsgBtn">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin:0 0 8px">Order Details</h3>
+      <div style="display:flex;gap:8px;margin:8px 0 12px">
+        <input id="orderIdInput" placeholder="Enter Order ID" style="flex:1;padding:10px;border:1px solid #e5e7eb;border-radius:12px">
+        <button class="btn" id="loadOrderBtn">Load</button>
+      </div>
+      <div id="orderSummary" class="meta"></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="inner container">
+      <div>
+        <div class="brand__logo" style="font-family:Pacifico,cursive;font-size:26px">FreshCart</div>
+        <p class="meta" style="color:#d1fae5">Freshness delivered in minutes. 6AM–11PM daily.</p>
+      </div>
+      <div>
+        <b>Shop</b>
+        <ul style="list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px">
+          <li><a href="index.html#categories">Fruits & Vegetables</a></li>
+          <li><a href="index.html#popular">Popular Products</a></li>
+          <li><a href="#">New Arrivals</a></li>
+        </ul>
+      </div>
+      <div>
+        <b>Company</b>
+        <ul style="list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px">
+          <li><a href="#">About</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Help Center</a></li>
+        </ul>
+      </div>
+      <div>
+        <b>Get the app</b>
+        <div style="display:grid;gap:10px;margin-top:10px">
+          <a href="#" class="btn" style="background:#ffffff22;color:#fff;">📱 App Store</a>
+          <a href="#" class="btn" style="background:#ffffff22;color:#fff;">▶ Play Store</a>
+        </div>
+      </div>
+    </div>
+    <div class="bottom">© 2025 FreshCart. All rights reserved.</div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    const authBtn = document.getElementById('authBtn');
+    const searchInput = document.getElementById('searchInput');
+    const cartBtn = document.getElementById('cartBtn');
+    const cartCountEl = document.getElementById('cartCount');
+    const chatLog = document.getElementById('chatLog');
+    const chatInput = document.getElementById('chatInput');
+    const freeformBox = document.getElementById('freeformBox');
+    const sendMsgBtn = document.getElementById('sendMsgBtn');
+    const wordCountEl = document.getElementById('wordCount');
+    const agentStatusEl = document.getElementById('agentStatus');
+    const orderSummaryEl = document.getElementById('orderSummary');
+    const orderIdInput = document.getElementById('orderIdInput');
+    const loadOrderBtn = document.getElementById('loadOrderBtn');
+    const otherBtn = document.getElementById('otherBtn');
+    const connectBtn = document.getElementById('connectBtn');
+
+    const AGENTS = ["Aarav","Diya","Vivaan","Anaya","Kabir","Ira","Reyansh","Myra"];
+    // Basic search redirect to products page with query param
+    searchInput?.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter'){
+        const q = encodeURIComponent(searchInput.value.trim());
+        location.href = q ? `products.html?q=${q}` : 'products.html';
+      }
+    });
+
+    // Simple cart badge from guest cart
+    const CART_KEY = 'freshcart_cart_items';
+    function getCart(){ try{return JSON.parse(localStorage.getItem(CART_KEY))||[];}catch{return[];} }
+    function updateBadge(){ cartCountEl.textContent = getCart().reduce((a,i)=> a + (i.qty||1), 0); }
+    cartBtn.addEventListener('click', ()=> location.href='cart.html');
+
+    function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(window.__t); window.__t=setTimeout(()=>el.classList.remove('show'),1800); }
+
+    function getChatKey(orderId){ return `freshcart_support_${orderId}`; }
+    function saveChat(orderId, payload){ localStorage.setItem(getChatKey(orderId), JSON.stringify(payload)); }
+    function loadChat(orderId){ try{return JSON.parse(localStorage.getItem(getChatKey(orderId)))||null;}catch{return null;} }
+    function clearAllSupportChats(){
+      try{
+        const keys = Object.keys(localStorage);
+        keys.forEach(k=>{ if(k.startsWith('freshcart_support_')) localStorage.removeItem(k); });
+      }catch{}
+    }
+
+    function renderChat(messages){
+      chatLog.innerHTML='';
+      (messages||[]).forEach(m=>{
+        const row=document.createElement('div');
+        row.style.display='flex';
+        row.style.justifyContent = m.role==='user' ? 'flex-end' : 'flex-start';
+        row.innerHTML = `<div style="max-width:70%;padding:8px 10px;border-radius:10px;${m.role==='user'?'background:#10b981;color:#fff;':'background:#e5e7eb;'}">${m.text}</div>`;
+        chatLog.appendChild(row);
+      });
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    function wordsCount(s){ return (s.trim().match(/\S+/g)||[]).length; }
+    function updateWordCount(){
+      const w = wordsCount(chatInput.value);
+      if(w>400){ chatInput.value = chatInput.value.trim().match(/\S+/g).slice(0,400).join(' '); }
+      wordCountEl.textContent = `${wordsCount(chatInput.value)}/400 words`;
+    }
+    chatInput.addEventListener('input', updateWordCount);
+
+    async function fetchOrders(){
+      if(!token || !userId) return [];
+      try{
+        const r = await fetch(`http://localhost:3000/api/orders/${userId}`, { headers: { Authorization: `Bearer ${token}` } });
+        if(!r.ok) return [];
+        const data = await r.json();
+        return Array.isArray(data) ? data : [];
+      }catch{ return []; }
+    }
+
+    function orderSummaryHTML(order){
+      if(!order) return '<div class="meta">No order selected.</div>';
+      const items = (order.items||[]).map(i=>`${i.product?.name||'Item'} × ${i.quantity||1}`).join(', ');
+      const created = new Date(order.createdAt).toLocaleString();
+      return `
+        <div><b>Order #${order._id.slice(-6).toUpperCase()}</b></div>
+        <div class="meta">Placed on ${created}</div>
+        <div class="meta">Items: ${items || '-'}</div>
+        <div class="meta">Total: ₹${(order.totalAmount||0).toFixed(2)}</div>
+      `;
+    }
+
+    let currentOrder = null;
+
+    function loadOrderIntoUI(order){
+      currentOrder = order;
+      orderSummaryEl.innerHTML = orderSummaryHTML(order);
+      // initialize chat state for this order (do not assign agent yet)
+      let state = loadChat(order._id) || { agent:null, assignedAt:null, messages:[] };
+      renderChat(state.messages);
+      if(state.agent){ agentStatusEl.textContent = `Connected with ${state.agent}`; } else { agentStatusEl.textContent = 'Choose a topic below or select Other to chat.'; }
+    }
+
+    // Load last order on page open
+    (async function init(){
+      // Auth button behavior to match other pages
+      if(token){
+        authBtn.textContent='Logout';
+        authBtn.onclick=()=>{ localStorage.clear(); location.reload(); };
+      }else{
+        authBtn.textContent='Login';
+        authBtn.onclick=()=>{ location.href='login.html'; };
+      }
+      // Clear all previous support chats on each page load
+      clearAllSupportChats();
+      chatLog.innerHTML='';
+      updateBadge();
+      const orders = await fetchOrders();
+      if(orders.length){
+        orders.sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+        loadOrderIntoUI(orders[0]);
+      } else {
+        orderSummaryEl.innerHTML = '<div class="meta">No orders found. Place an order to start a chat.</div>';
+      }
+    })();
+
+    loadOrderBtn.addEventListener('click', async ()=>{
+      const id = orderIdInput.value.trim();
+      if(!id){ toast('Enter an Order ID'); return; }
+      const orders = await fetchOrders();
+      const found = orders.find(o=> (o._id===id) || o._id.endsWith(id));
+      if(!found){ toast('Order not found'); return; }
+      loadOrderIntoUI(found);
+    });
+
+    sendMsgBtn.addEventListener('click', async ()=>{
+      if(!currentOrder){
+        const typedId = orderIdInput.value.trim();
+        if(typedId){
+          const orders = await fetchOrders();
+          const found = orders.find(o=> (o._id===typedId) || o._id.endsWith(typedId));
+          if(found){ loadOrderIntoUI(found); }
+        }
+      }
+      if(!currentOrder){ toast('Select or enter an Order ID first'); return; }
+      const text = chatInput.value.trim();
+      if(!text) return;
+      let state = loadChat(currentOrder._id) || { messages:[] };
+      state.messages.push({ role:'user', text });
+      saveChat(currentOrder._id, state);
+      chatInput.value='';
+      updateWordCount();
+      renderChat(state.messages);
+
+      // static contextual reply
+      setTimeout(()=>{
+        const items = (currentOrder.items||[]).map(i=>`${i.product?.name||'Item'} × ${i.quantity||1}`).join(', ');
+        const reply = `Thanks for reaching out. I see order #${currentOrder._id.slice(-6).toUpperCase()} with items: ${items||'N/A'}. A support agent will assist you shortly.`;
+        const cur = loadChat(currentOrder._id) || { messages:[] };
+        cur.messages.push({ role:'bot', text: reply });
+        saveChat(currentOrder._id, cur);
+        renderChat(cur.messages);
+      }, 600);
+
+      // If an agent is already assigned, acknowledge resolution soon after user's message (only once)
+      setTimeout(()=>{
+        const cur = loadChat(currentOrder._id) || { messages:[] };
+        if(cur.agent && !cur.resolutionAckSent){
+          cur.messages.push({ role:'agent', text: `Thanks for the details. We'll work on this and resolve your query soon.` });
+          cur.resolutionAckSent = true;
+          saveChat(currentOrder._id, cur);
+          renderChat(cur.messages);
+        }
+      }, 900);
+
+      // Assign agent deterministically now, reveal greeting after 10s
+      let st = loadChat(currentOrder._id) || { messages:[] };
+      if(!st.agent){
+        const agent = AGENTS[Math.floor(Math.random()*AGENTS.length)];
+        st.agent = agent;
+        st.assignedAt = Date.now();
+        st.resolutionAckSent = st.resolutionAckSent || false;
+        saveChat(currentOrder._id, st);
+        agentStatusEl.textContent = 'Assigning agent...';
+        setTimeout(()=>{
+          const cur = loadChat(currentOrder._id) || { messages:[] };
+          if(!cur.agent) return;
+          cur.messages.push({ role:'agent', text:`Our agent ${cur.agent} is connected to you. Please tell us your query.` });
+          saveChat(currentOrder._id, cur);
+          agentStatusEl.textContent = `Connected with ${cur.agent}`;
+          renderChat(cur.messages);
+        }, 10000);
+      }
+    });
+
+    // Show freeform input only when user chooses Other
+    otherBtn.addEventListener('click', ()=>{
+      freeformBox.style.display='block';
+      chatInput.focus();
+      updateWordCount();
+      // Start a new chat session: clear any prior agent so a new one will be assigned on next message
+      if(currentOrder){
+        const st = loadChat(currentOrder._id) || { messages:[] };
+        st.agent = null;
+        st.assignedAt = null;
+        st.resolutionAckSent = false;
+        saveChat(currentOrder._id, st);
+      }
+      agentStatusEl.textContent = 'New chat started. You can type your query or connect to an agent.';
+      connectBtn.style.display = 'inline-flex';
+    });
+
+    // Explicit connect to agent on demand
+    connectBtn.addEventListener('click', ()=>{
+      if(!currentOrder){ toast('Select or enter an Order ID first'); return; }
+      const st = loadChat(currentOrder._id) || { messages:[] };
+      if(!st.agent){
+        const agent = AGENTS[Math.floor(Math.random()*AGENTS.length)];
+        st.agent = agent;
+        st.assignedAt = Date.now();
+        saveChat(currentOrder._id, st);
+        agentStatusEl.textContent = 'Connecting to agent...';
+        setTimeout(()=>{
+          const cur = loadChat(currentOrder._id) || { messages:[] };
+          cur.messages.push({ role:'agent', text:`Our agent ${cur.agent} is connected to you. Please tell us your query.` });
+          saveChat(currentOrder._id, cur);
+          agentStatusEl.textContent = `Connected with ${cur.agent}`;
+          renderChat(cur.messages);
+          connectBtn.style.display = 'none';
+        }, 1000);
+      }
+    });
+
+    // Quick questions: respond without assigning an agent; allow without order
+    document.querySelectorAll('.quick-qs button[data-q]').forEach(b=> b.addEventListener('click', ()=>{
+      if(!currentOrder){ agentStatusEl.textContent = 'Select an order (or enter ID) for precise help, or choose Other to chat.'; }
+      const q = b.dataset.q;
+      const key = currentOrder?._id || 'general';
+      const state = loadChat(key) || { messages:[] };
+      state.messages.push({ role:'user', text: q });
+      saveChat(key, state);
+      renderChat(state.messages);
+      setTimeout(()=>{
+        const items = (currentOrder?.items||[]).map(i=>`${i.product?.name||'Item'} × ${i.quantity||1}`).join(', ');
+        const replyMap = {
+          'Where is my order?': 'Your order is on its way. You can expect delivery shortly.',
+          'I received a wrong item': 'Sorry about that. We can arrange a quick replacement or refund.',
+          'I want to cancel my order': 'We will try to cancel if it has not been dispatched yet.',
+          'Refund status': 'Refunds typically reflect within 5-7 business days.'
+        };
+        const orderTag = currentOrder ? `For order #${currentOrder._id.slice(-6).toUpperCase()}, ` : '';
+        const reply = `${replyMap[q]||'Thanks for your query.'} ${orderTag}items: ${items||'N/A'}.`;
+        const cur = loadChat(key) || { messages:[] };
+        cur.messages.push({ role:'bot', text: reply });
+        saveChat(key, cur);
+        renderChat(cur.messages);
+      }, 500);
+    }));
+  </script>
+</body>
+</html>
+
+

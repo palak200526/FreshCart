@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FreshCart – Your Orders</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{ --primary:#10b981; --primary-dark:#059669; --bg:#f8fafc; --card:#fff; --shadow:0 10px 25px rgba(2,6,23,.08); --radius:16px; --ink:#0f172a; --muted:#64748b; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--ink);background:var(--bg)}
+    a{text-decoration:none;color:inherit}
+    .container{max-width:1200px;margin:0 auto;padding:20px}
+    h1,h2,h3{margin:0}
+    .btn{display:inline-flex;align-items:center;gap:10px;border:0;border-radius:12px;padding:10px 14px;background:var(--primary);color:#fff;font-weight:600;cursor:pointer;box-shadow:var(--shadow)}
+    .btn:active{transform:translateY(1px)}
+
+    /* NAVBAR */
+    .nav{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#0fbf78,#0ca26b);box-shadow:0 4px 18px rgba(2,6,23,.08)}
+    .nav .inner{display:flex;align-items:center;gap:18px;justify-content:space-between;padding:12px 20px}
+    .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-family:Pacifico,cursive;font-size:28px}
+    .nav-links{display:flex;gap:18px}
+    .nav-links a{color:#fff;font-weight:500}
+    .nav-actions{display:flex;align-items:center;gap:14px}
+
+    /* ORDERS */
+    .page-head{padding:30px 0}
+    .orders{display:grid;gap:16px}
+    .order{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+    .order__top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+    .order__meta{color:var(--muted);font-size:14px}
+    .badge{display:inline-block;padding:4px 10px;border-radius:999px;background:#e2f6f1;color:#065f46;font-weight:600;font-size:12px}
+    .items{margin-top:8px}
+    .item{display:flex;justify-content:space-between;margin:6px 0}
+    .total{display:flex;justify-content:space-between;margin-top:10px;font-weight:700}
+    .empty{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;text-align:center;color:var(--muted)}
+
+    /* TOAST */
+    .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.3s}
+    .toast.show{opacity:1;pointer-events:auto}
+
+    /* FOOTER */
+    footer{margin-top:56px;background:linear-gradient(180deg, #075e46, #064e3b);color:#e5f9f1}
+    footer .inner{padding:30px 20px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:20px}
+    @media(max-width:900px){footer .inner{grid-template-columns:1fr 1fr}}
+    @media(max-width:600px){footer .inner{grid-template-columns:1fr}}
+    footer a{color:#c8f5e6}
+    footer .bottom{border-top:1px solid #ffffff22;padding:12px 0;text-align:center;color:#a7f3d0}
+  </style>
+  </head>
+  <body>
+
+  <!-- NAVBAR -->
+  <header class="nav">
+    <div class="inner container">
+      <a href="index.html" class="brand">FreshCart</a>
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="products.html">Products</a>
+        <a href="orders.html">Orders</a>
+        <a href="support.html">Support</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="btn" id="authBtn" style="background:#fff;color:#0f172a">Login</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="container page-head">
+    <h1>Your Orders</h1>
+    <p class="order__meta">Track your previous purchases and delivery status</p>
+  </section>
+
+  <section class="container">
+    <div id="orders" class="orders"></div>
+    <div id="emptyState" class="empty" style="display:none">No orders yet. <a href="products.html" class="btn" style="margin-left:8px">Shop now</a></div>
+  </section>
+
+  <footer>
+    <div class="container inner">
+      <div>
+        <div class="brand__logo" style="font-family:Pacifico,cursive;font-size:26px">FreshCart</div>
+        <p class="meta" style="color:#d1fae5">Freshness delivered in minutes. 6AM–11PM daily.</p>
+      </div>
+      <div>
+        <b>Shop</b>
+        <ul style="list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px">
+          <li><a href="index.html#categories">Fruits & Vegetables</a></li>
+          <li><a href="index.html#popular">Popular Products</a></li>
+          <li><a href="#">New Arrivals</a></li>
+        </ul>
+      </div>
+      <div>
+        <b>Company</b>
+        <ul style="list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px">
+          <li><a href="#">About</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Help Center</a></li>
+        </ul>
+      </div>
+      <div>
+        <b>Get the app</b>
+        <div style="display:grid;gap:10px;margin-top:10px">
+          <a href="#" class="btn" style="background:#ffffff22;color:#fff;">📱 App Store</a>
+          <a href="#" class="btn" style="background:#ffffff22;color:#fff;">▶ Play Store</a>
+        </div>
+      </div>
+    </div>
+    <div class="bottom">© 2025 FreshCart. All rights reserved.</div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const ordersEl = document.getElementById('orders');
+    const emptyEl = document.getElementById('emptyState');
+    const authBtn = document.getElementById('authBtn');
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+
+    if (token) {
+      authBtn.textContent = 'Logout';
+      authBtn.onclick = () => { localStorage.clear(); location.reload(); };
+    } else {
+      authBtn.textContent = 'Login';
+      authBtn.onclick = () => { location.href = 'login.html'; };
+    }
+
+    function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(window.__t); window.__t=setTimeout(()=>el.classList.remove('show'),1800); }
+
+    async function loadOrders(){
+      if(!token || !userId){ toast('Please login to view orders'); location.href='login.html'; return; }
+      try{
+        const res = await fetch(`http://localhost:3000/api/orders/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if(!res.ok){ throw new Error('Failed to fetch orders'); }
+        const data = await res.json();
+
+        if(!Array.isArray(data) || data.length===0){
+          emptyEl.style.display='block'; ordersEl.innerHTML=''; return;
+        }
+
+        // newest first
+        data.sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+
+        ordersEl.innerHTML='';
+        data.forEach(order=>{
+          const div = document.createElement('div');
+          div.className='order';
+          const created = new Date(order.createdAt).toLocaleString();
+          const status = order.status || 'Pending';
+          const partner = order.deliveryPartner ? `${order.deliveryPartner}` : 'Assigning...';
+          const itemsHtml = (order.items||[]).map(i=>{
+            const name = i.product?.name || 'Item';
+            const qty = i.quantity || 1;
+            const line = (i.price||0) * qty;
+            return `<div class="item"><span>${name} × ${qty}</span><span>₹${line.toFixed(2)}</span></div>`;
+          }).join('');
+          const total = order.totalAmount || (order.items||[]).reduce((s,i)=>s+(i.price||0)*(i.quantity||1),0);
+
+          div.innerHTML = `
+            <div class="order__top">
+              <div>
+                <div><b>Order #${order._id.slice(-6).toUpperCase()}</b></div>
+                <div class="order__meta">Placed on ${created}</div>
+              </div>
+              <div>
+                <span class="badge">${status}</span>
+              </div>
+            </div>
+            <div class="order__meta">Delivery Partner: <b>${partner}</b></div>
+            <div class="items">${itemsHtml}</div>
+            <div class="total"><span>Total</span><span>₹${total.toFixed(2)}</span></div>
+          `;
+          ordersEl.appendChild(div);
+        });
+      }catch(err){
+        console.error('Orders load error', err);
+        toast('Could not load orders');
+      }
+    }
+
+    loadOrders();
+  </script>
+  <script>
+  // --- Search Bar Handler (common across all pages) ---
+  (function(){
+    const searchInput = document.getElementById('searchInput');
+    if(searchInput){
+      searchInput.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter'){
+          const q = encodeURIComponent(searchInput.value.trim());
+          // Redirect to products page with query string
+          if(q){
+            location.href = `products.html?q=${q}`;
+          } else {
+            location.href = 'products.html';
+          }
+        }
+      });
+    }
+  })();
+</script>
+
+  </body>
+  </html>
+
+

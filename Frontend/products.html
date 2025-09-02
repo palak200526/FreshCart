@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FreshCart – All Products</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* === your CSS (unchanged) === */
+:root{
+  --primary:#10b981;--primary-600:#059669;--ink:#0f172a;--muted:#64748b;--bg:#f8fafc;--card:#fff;--radius:16px;--shadow:0 10px 25px rgba(2,6,23,0.08);
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:Poppins, sans-serif;color:var(--ink);background:var(--bg);}
+.container{max-width:1200px;margin:0 auto;padding:0 20px;}
+.btn{display:inline-flex;align-items:center;gap:10px;border:0;border-radius:12px;padding:12px 18px;background:linear-gradient(135deg,var(--primary),var(--primary-600));color:#fff;font-weight:600;cursor:pointer;box-shadow:var(--shadow);}
+.btn:active{transform:translateY(1px);}
+h1,h2,h3{margin:0;}
+.grid{display:grid;gap:18px;}
+.grid--prods{grid-template-columns:repeat(4,1fr);}
+@media(max-width:1100px){.grid--prods{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:780px){.grid--prods{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:520px){.grid--prods{grid-template-columns:1fr;}}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:transform .2s;cursor:pointer;}
+.card:hover{transform:translateY(-4px);}
+.card img{width:100%;height:200px;object-fit:cover;display:block;}
+.pad{padding:14px;}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.price{font-weight:700;}
+.meta{color:var(--muted);font-size:14px;}
+.nav{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#0fbf78,#0ca26b);box-shadow:0 4px 18px rgba(2,6,23,.08);}
+.nav .inner{display:flex;align-items:center;justify-content:space-between;padding:12px 0;}
+.brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;}
+.brand__logo{font-family:Pacifico,cursive;font-size:28px;}
+.nav-links a{ text-decoration:none; }
+.nav-actions{display:flex;align-items:center;gap:14px;}
+.cart{position:relative;color:#0f172a;background:#fff;border-radius:12px;padding:8px 12px;font-weight:700;cursor:pointer;}
+.cart__badge{position:absolute;top:-8px;right:-8px;background:#ef4444;color:#fff;font-weight:700;border-radius:999px;min-width:22px;height:22px;display:grid;place-items:center;font-size:12px;border:2px solid #fff;}
+.category-bar{display:flex;gap:12px;margin:20px 0;flex-wrap:wrap;}
+.category-bar button{padding:8px 16px;border:none;border-radius:999px;background:#e2f6f1;color:var(--ink);cursor:pointer;font-weight:600;transition:.2s;}
+.category-bar button.active,.category-bar button:hover{background:var(--primary);color:#fff;}
+footer{margin-top:56px;background:linear-gradient(180deg,#075e46,#064e3b);color:#e5f9f1;}
+footer .inner{padding:30px 20px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:20px;}
+footer a{color:#c8f5e6;text-decoration:none;}
+footer .bottom{border-top:1px solid #ffffff22;padding:12px 0;text-align:center;color:#a7f3d0;}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.3s;}
+.toast.show{opacity:1;pointer-events:auto;}
+#productModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;z-index:1000;}
+#productModal .modal-content{background:#fff;border-radius:16px;max-width:800px;width:90%;padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px;position:relative;}
+#productModal .modal-content img{width:100%;border-radius:12px;object-fit:cover;}
+#productModal button.close-modal{position:absolute;top:12px;right:12px;font-size:22px;border:none;background:none;cursor:pointer;}
+#productModal .quantity{display:flex;align-items:center;gap:10px;margin:12px 0;}
+#productModal .quantity button{padding:4px 10px;border:none;background:#10b981;color:#fff;border-radius:6px;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="nav">
+  <div class="container inner">
+    <a class="brand" href="index.html"><div class="brand__logo">FreshCart</div></a>
+    <nav class="nav-links" style="display:flex;gap:20px;">
+      <a href="index.html" style="color:#fff;font-weight:500;">Home</a>
+      <a href="products.html" style="color:#fff;font-weight:500;">Products</a>
+      <a href="orders.html" style="color:#fff;font-weight:500;">Orders</a>
+      <a href="support.html" style="color:#fff;font-weight:500;">Support</a>
+    </nav>
+    <div class="nav-actions">
+      <input id="searchInput" type="text" placeholder="Search products..." style="padding:6px 10px;border-radius:12px;border:none;outline:none;width:180px;">
+      <button class="cart" id="cartBtn">🛒 Cart <span class="cart__badge" id="cartCount">0</span></button>
+      <button class="btn" id="authBtn" style="background:#fff;color:var(--primary);padding:8px 14px;font-weight:500;">Login</button>
+    </div>
+  </div>
+</header>
+
+<!-- PAGE HEADER -->
+<section class="container" style="padding:40px 0;text-align:center;">
+  <h1>All Products</h1>
+  <p style="color:var(--muted);">Browse all items available for 30-minute delivery</p>
+</section>
+
+<!-- CATEGORY FILTER -->
+<section class="container">
+  <div class="category-bar" id="categoryBar">
+    <button class="active" data-cat="all">All</button>
+    <button data-cat="Fruits">Fruits</button>
+    <button data-cat="Vegetables">Vegetables</button>
+    <button data-cat="Dairy">Dairy</button>
+    <button data-cat="Bakery">Bakery</button>
+    <button data-cat="Beverages">Beverages</button>
+  </div>
+</section>
+
+<!-- PRODUCTS GRID -->
+<section class="container">
+  <div class="grid grid--prods" id="productGrid"></div>
+</section>
+
+<!-- CART SIDEBAR -->
+<div id="cartSidebar" style="position:fixed;top:0;right:-400px;width:360px;height:100vh;background:#fff;box-shadow:-5px 0 20px rgba(0,0,0,0.15);transition:0.3s;z-index:999;display:flex;flex-direction:column;">
+  <div style="padding:20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;">
+    <h2 style="margin:0;font-size:20px;">Your Cart</h2>
+    <button onclick="closeCart()" style="font-size:18px;background:none;border:none;cursor:pointer;">×</button>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:20px;" id="cartItems"></div>
+  <div style="padding:20px;border-top:1px solid #e2e8f0;">
+    <div class="row" style="margin-bottom:12px;"><b>Total:</b> <span id="cartTotal">₹0</span></div>
+    <button class="btn" style="width:100%;" onclick="checkout()">Checkout</button>
+  </div>
+</div>
+
+<!-- PRODUCT DETAILS MODAL -->
+<div id="productModal">
+  <div class="modal-content">
+    <button class="close-modal" onclick="closeModal()">×</button>
+    <img id="modalImage" src="" alt="Product Image">
+    <div>
+      <h2 id="modalName">Product Name</h2>
+      <div class="price" id="modalPrice">₹0</div>
+      <div class="meta" id="modalDesc">Product description here.</div>
+      <div class="quantity">
+        <button onclick="changeModalQty(-1)">−</button>
+        <span id="modalQty">1</span>
+        <button onclick="changeModalQty(1)">+</button>
+      </div>
+      <button class="btn" onclick="addModalToCart()">Add to Cart</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container inner">
+    <div><div class="brand__logo">FreshCart</div><p class="meta" style="color:#d1fae5">Freshness delivered in minutes. 6AM–11PM daily.</p></div>
+    <div><b>Shop</b><ul style="list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px"><li><a href="products.html">All Products</a></li><li><a href="#">New Arrivals</a></li></ul></div>
+    <div><b>Company</b><ul style="list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px"><li><a href="#">About</a></li><li><a href="#">Careers</a></li></ul></div>
+    <div><b>Get the app</b><div style="display:grid;gap:10px;margin-top:10px"><a href="#" style="display:inline-flex;align-items:center;gap:8px;background:#ffffff22;">📱 App Store</a><a href="#" style="display:inline-flex;align-items:center;gap:8px;background:#ffffff22;">▶ Play Store</a></div></div>
+  </div>
+  <div class="bottom">© 2025 FreshCart. All rights reserved.</div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* === AUTH CHECK === */
+const token = localStorage.getItem("token");
+const userId = localStorage.getItem("userId");
+const authBtn = document.getElementById("authBtn");
+if (token) {
+  authBtn.textContent = "Logout";
+  authBtn.onclick = () => { localStorage.clear(); location.reload(); };
+} else {
+  authBtn.textContent = "Login";
+  authBtn.onclick = () => { location.href = "login.html"; };
+}
+
+/* === CART LOGIC === */
+const cartSidebar=document.getElementById('cartSidebar');
+const cartItemsEl=document.getElementById('cartItems');
+const cartTotalEl=document.getElementById('cartTotal');
+const cartCountEl=document.getElementById('cartCount');
+const CART_KEY='freshcart_cart_items';   // ✅ unified key
+
+function getCart(){ try{return JSON.parse(localStorage.getItem(CART_KEY))||[];}catch{return[];} }
+function setCart(items){localStorage.setItem(CART_KEY, JSON.stringify(items));}
+function updateBadge(){cartCountEl.textContent=getCart().reduce((a,i)=>a+(i.qty||1),0);}
+function openCart(){cartSidebar.style.right='0';}
+function closeCart(){cartSidebar.style.right='-400px';}
+
+function renderCart(){
+  const cart=getCart();
+  cartItemsEl.innerHTML=''; let total=0;
+  cart.forEach((item,idx)=>{
+    const itemTotal=item.price*(item.qty||1); total+=itemTotal;
+    const div=document.createElement('div'); 
+    div.style.display='flex';
+    div.style.justifyContent='space-between';
+    div.style.alignItems='center';
+    div.style.marginBottom='12px';
+    div.innerHTML=`<div><b>${item.name}</b><br><span style="color:#64748b;font-size:13px;">₹${item.price} × ${item.qty||1}</span></div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button onclick="changeQty(${idx},-1)">−</button>
+        <button onclick="changeQty(${idx},1)">+</button>
+        <button onclick="removeItem(${idx})" style="color:red;">×</button>
+      </div>`;
+    cartItemsEl.appendChild(div);
+  });
+  cartTotalEl.textContent='₹'+total.toFixed(2);
+  updateBadge();
+}
+
+async function syncBackendCart(){
+  if(token && userId){
+    try{
+      const res=await fetch(`http://localhost:3000/api/cart/${userId}`,{
+        headers:{Authorization:`Bearer ${token}`}
+      });
+      if(res.ok){
+        const data=await res.json();
+        setCart(data.products.map(p=>({
+          id:p.productId._id,
+          name:p.productId.name,
+          price:p.productId.price,
+          qty:p.quantity
+        })));
+      }
+    }catch(e){console.error("Cart sync error",e);}
+  }
+  renderCart();
+}
+
+async function addToCart(item){
+  if(token && userId){
+    await fetch(`http://localhost:3000/api/cart/${userId}/add`, {
+      method:"POST",
+      headers:{"Content-Type":"application/json", Authorization:`Bearer ${token}`},
+      body: JSON.stringify({ productId: item.id, quantity: item.qty || 1 })
+    });
+  }
+  const cart = getCart();
+  const idx = cart.findIndex(i => i.id === item.id);
+  if(idx > -1) cart[idx].qty += item.qty || 1;
+  else cart.push({...item});
+  setCart(cart); renderCart(); toast(`${item.name} added 🧺`); openCart();
+}
+
+async function changeQty(idx, delta){
+  const cart = getCart(); 
+  cart[idx].qty += delta;
+  if(cart[idx].qty <= 0){ removeItem(idx,true); return; }
+  
+  if(token && userId){
+    await fetch(`http://localhost:3000/api/cart/${userId}/add`, {
+      method:"POST",
+      headers:{"Content-Type":"application/json", Authorization:`Bearer ${token}`},
+      body: JSON.stringify({ productId: cart[idx].id, quantity: cart[idx].qty })
+    });
+  }
+  setCart(cart); renderCart();
+}
+
+async function removeItem(idx, fromChange=false){
+  const cart = getCart();
+  const productId = cart[idx].id;
+  
+  if(token && userId){
+    await fetch(`http://localhost:3000/api/cart/${userId}/remove/${productId}`, {
+      method:"DELETE",
+      headers:{"Authorization":`Bearer ${token}`}
+    });
+  }
+  
+  cart.splice(idx,1); 
+  setCart(cart); 
+  if(!fromChange) renderCart();
+}
+
+/* === CHECKOUT === */
+function checkout(){
+  if(!token || !userId){
+    toast("Login required");
+    location.href="login.html";
+    return;
+  }
+
+  const cart = getCart(); 
+  if(cart.length === 0){
+    toast("Cart empty 🛒");
+    return;
+  }
+
+  // ✅ just redirect, no order placement here
+  window.location.href = "checkout.html";
+}
+
+
+/* === TOAST === */
+function toast(msg){
+  const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
+  clearTimeout(window.__toastTimer); window.__toastTimer=setTimeout(()=>el.classList.remove('show'),1800);
+}
+
+/* === CATEGORY FILTER === */
+const categoryBar=document.getElementById('categoryBar'); 
+const productGrid=document.getElementById('productGrid');
+categoryBar.querySelectorAll('button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    categoryBar.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const cat=btn.dataset.cat;
+    document.querySelectorAll('.card').forEach(card=>{
+      card.style.display=(cat==='all'||card.dataset.category===cat)?'block':'none';
+    });
+  });
+});
+
+/* === PRODUCT MODAL === */
+const modal=document.getElementById('productModal'); 
+const modalImage=document.getElementById('modalImage');
+const modalName=document.getElementById('modalName'); 
+const modalPrice=document.getElementById('modalPrice');
+const modalDesc=document.getElementById('modalDesc'); 
+const modalQtyEl=document.getElementById('modalQty');
+let modalQty=1; let currentProduct={};
+function openModal(p){
+  modal.style.display='flex';
+  modalImage.src=p.image;
+  modalName.textContent=p.name;
+  modalPrice.textContent='₹'+p.price;
+  modalDesc.textContent=p.description;
+  modalQty=1;
+  modalQtyEl.textContent=modalQty;
+  currentProduct=p;
+}
+function closeModal(){modal.style.display='none';}
+function changeModalQty(delta){modalQty+=delta;if(modalQty<1)modalQty=1;modalQtyEl.textContent=modalQty;}
+function addModalToCart(){
+  addToCart({
+    id: currentProduct.id,
+    name: currentProduct.name,
+    price: currentProduct.price,
+    qty: modalQty
+  });
+  closeModal();
+}
+
+
+/* === LOAD PRODUCTS FROM BACKEND === */
+function applyQueryFilter(q){
+  if(!q) return;
+  const term = q.toLowerCase();
+  document.querySelectorAll('#productGrid .card').forEach(card=>{
+    const name=(card.dataset.name||'').toLowerCase();
+    const desc=(card.dataset.desc||'').toLowerCase();
+    card.style.display = (name.includes(term) || desc.includes(term)) ? 'block' : 'none';
+  });
+}
+
+async function loadProducts(){
+  try{
+    const res=await fetch("http://localhost:3000/api/products");
+    const data=await res.json();
+    productGrid.innerHTML="";
+    data.forEach(prod=>{
+      const card=document.createElement("article");
+      card.className="card"; 
+      card.dataset.category=prod.category||"Misc"; 
+      card.dataset.name=prod.name;
+      card.dataset.price=prod.price; 
+      card.dataset.desc=prod.description; 
+      card.dataset.img=prod.imageUrl||"https://picsum.photos/300";
+      card.innerHTML=`<img src="${prod.imageUrl||"https://picsum.photos/300"}" alt="${prod.name}">
+        <div class="pad"><div class="row"><h3>${prod.name}</h3><span class="price">₹${prod.price}</span></div>
+        <div class="meta">${prod.description}</div>
+        <button class="btn add">Add to Cart</button></div>`;
+      card.querySelector(".add").addEventListener("click",e=>{
+        e.stopPropagation(); 
+        addToCart({id:prod._id,name:prod.name,price:prod.price,qty:1});
+      });
+      card.addEventListener("click",e=>{
+        if(e.target.tagName.toLowerCase()!=='button'){
+          openModal({
+            id:prod._id,
+            name:prod.name,
+            price:prod.price,
+            description:prod.description,
+            image:prod.imageUrl||"https://picsum.photos/300"
+          });
+        }
+      });
+      productGrid.appendChild(card);
+    });
+
+    // Apply search from URL if present
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if(q){
+      const si = document.getElementById('searchInput');
+      if(si) si.value = q;
+      applyQueryFilter(q);
+    }
+  }catch(e){console.error("Products load error",e);}
+}
+
+/* === INIT === */
+// Search input filtering on Enter
+const searchInputEl = document.getElementById('searchInput');
+searchInputEl?.addEventListener('keydown', (e)=>{
+  if(e.key==='Enter'){
+    applyQueryFilter(searchInputEl.value.trim());
+  }
+});
+
+loadProducts(); 
+syncBackendCart();
+</script>
+
+<script>
+  // --- Search Bar Handler (common across all pages) ---
+  (function(){
+    const searchInput = document.getElementById('searchInput');
+    if(searchInput){
+      searchInput.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter'){
+          const q = encodeURIComponent(searchInput.value.trim());
+          // Redirect to products page with query string
+          if(q){
+            location.href = `products.html?q=${q}`;
+          } else {
+            location.href = 'products.html';
+          }
+        }
+      });
+    }
+  })();
+</script>
+
+
+</body>
+</html>
